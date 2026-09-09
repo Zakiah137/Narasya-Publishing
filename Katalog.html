@@ -22,9 +22,9 @@
         .card-event {
             background-color: #1f374f;
             border-radius: 12px;
-            padding: 25px;
-            width: 260px;
-            height: 450px;
+            padding: 15px;
+            width: 240px;
+            height: auto;
             box-sizing: border-box;
             justify-content: space-between;
             margin-bottom: 20px;
@@ -41,7 +41,7 @@
 
         .img-container {
             width: 100%;
-            height: 180px;
+            height: 200px;
             background-color: #131313;
             border-radius: 8px;
             overflow: hidden;
@@ -49,6 +49,19 @@
             justify-content: center;
             text-align: center;
         }
+
+        body::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: #131313
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: #dddddd;
+            border-radius: 6px;
+        }      
 
         header {
             background-color: #131313;
@@ -118,9 +131,9 @@
             color: #dddddd;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             box-sizing: border-box;
-            overflow: hidden;
+            overflow-y: auto;
         }
 
         .main-content {
