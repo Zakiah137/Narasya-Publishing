@@ -169,7 +169,7 @@ info penerbitan hubungi telp/ sms/ wa ke 0852 9698 9579, 0856 4191 3489
             alert("Berhasil Login");
             location.reload();
         } catch (error) {
-            alert("Email atau password salah");
+            alert("Email atau password salah " + error.code);
         }
     };
 
