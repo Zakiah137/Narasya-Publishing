@@ -24,7 +24,15 @@
         .detail-info {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 4px;
+        }
+
+        .detail-info h1 {
+            margin: 0 0 10px 0;
+        }
+
+        .detail-info p {
+            margin: 4px 0;
         }
         
         header {
@@ -174,10 +182,10 @@ viewBox="500 8500 13000 9500"
 
             <div class="detail-info"> 
             <h1>${detailBuku.judul}</h1>
-            <p><strong>Penulis</strong> ${detailBuku.penulis || '-'}</p>
-            <p><strong>Tahun Terbit</strong> ${detailBuku.tahunTerbit || '-'}</p>
-            <p><strong>ISBN</strong> ${detailBuku.isbn || '-'}</p>
-            <h3>Sinopisis</h3>
+            <p><strong>Penulis: </strong> ${detailBuku.penulis || '-'}</p>
+            <p><strong>Tahun Terbit: </strong> ${detailBuku.tahunTerbit || '-'}</p>
+            <p><strong>ISBN: </strong> ${detailBuku.isbn || '-'}</p>
+            <h3 style="margin: 10px 0 4px 0;">Sinopisis: </h3>
             <p style="line-height: 1.5; max-width: 600px;">${detailBuku.sinopsis || 'Belum ada sinopsis.'}</p>
             <a href="${detailBuku.link}" target="_blank">${detailBuku.teks}</a>
             </div>
