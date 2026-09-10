@@ -2,57 +2,13 @@
 <html>
 <head>
     <link rel="icon" type="image/png" href="LOGO.png">
-    <title>Detail</title>
     
     <meta charset="UTF-8">
     <style>
-        
-        #detail {
-            display: flex;
-            gap: 40px;
-            align-items: flex-start;
-            background-color: rgba(19,19,19,0.6);
-            padding: 40px;
-            border-radius: 12px;
-            width: 900px;
-            margin-top: 30px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        #form {
+            text-align: center;
         }
 
-        .detail-info {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .detail-info h1 {
-            margin: 0 0 10px 0;
-        }
-
-        .detail-info p {
-            margin: 4px 0;
-        }
-
-        .detail-info p::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .detail-info p::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        .detail-info p::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 10px;
-        }
-        
-        .detail-info p::-webkit-scrollbar-track:hover {
-            background: rgba(255, 255, 255, 0.7);
-        }
-        
         header {
             background-color: #131313;
             padding: 15px 30px;
@@ -180,35 +136,120 @@ viewBox="500 8500 13000 9500"
 
 
 
-    <div id="detail"></div>
-    <br>
-    <div style="max-width: 900px; width: 100%; margin: 0 auto 40px auto; margin-left: 20px; margin-bottom: 40px;">
-    <a href="Katalog.html" style="position: fixed; bottom: 20px; left: 30px; background-color: #131313; color: #dddddd; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-family: arial; font-size: 20px; display: inline-block; max-width: 200px;">Kembali</a>
-    </div>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const indexBuku = urlParams.get('id');
 
-        let buku = JSON.parse(localStorage.getItem('book')) || [];
-        let detailBuku = buku [indexBuku];
+    <form id="form">
+        <label>Judul</label><br>
+        <label>Cover</label><br>
+        <input type="file" id="cover" placeholder="Foto"><br><br>
 
-        const container = document.getElementById('detail');
-        if (detailBuku) {
-            container.innerHTML = `
-            <img src="${detailBuku.cover}" style="width: 220px; height: 320px; object-fit: cover; border-radius: 8px;"><br><br>
+        <input type="text" id="judul" placeholder="Judul"><br><br>
 
-            <div class="detail-info"> 
-            <h1>${detailBuku.judul}</h1>
-            <p><strong>Penulis: </strong> ${detailBuku.penulis || '-'}</p>
-            <p><strong>Tahun Terbit: </strong> ${detailBuku.tahunTerbit || '-'}</p>
-            <p><strong>ISBN: </strong> ${detailBuku.isbn || '-'}</p>
-            <h3 style="margin: 10px 0 4px 0;">Sinopisis: </h3>
-            <p style="max-height: 200px; overflow-y: auto; padding-right: 5px; line-height: 1.5; max-width: 600px;">${detailBuku.sinopsis || 'Belum ada sinopsis.'}</p>
-            <a href="${detailBuku.link}" target="_blank">${detailBuku.teks}</a>
-            </div>
-            `;
+        <label>Penulis</label>
+        <textarea id="penulis" placeholder="Penulis"></textarea><br><br>
+
+        <label>Tahun terbit</label>
+        <textarea id="tahunTerbit" placeholder="Tahun terbit"></textarea><br><br>
+
+        <label>ISBN</label>
+        <textarea id="isbn" placeholder="ISBN"></textarea><br><br>
+
+        <label>Sinopsis</label>
+        <textarea id="sinopsis" placeholder="Sinopsis"></textarea><br><br>
+
+        <label>Beli</label>
+        <input type="text" id="teks" placeholder="Teks">
+        <input type="url" id="url" placeholder="Link">
+        <button type="button" onclick="buatLink()">Buat Link</button><br><br>
+        <div id="link"></div>
+
+        <button type="button" onclick="simpanData()">Publikasikan</button>
+    </form>
+    
+
+
+
+    <script type="module">
+        import { initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getFirestore, collection, addDoc} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOrBwYYx-VOC44IHZW0Wn_ifSTwdvBub0",
+            authDomain: "narasya-publishing.firebaseapp.com",
+            projectId: "narasya-publishing",
+            storageBucket: "narasya-publishing.firebasestorage.app",
+            messagingSenderId: "532075136025",
+            appId: "1:532075136025:web:3e722988a411c13814d688",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const CLOUD_NAME = "mksvjjiv";
+        const UPLOAD_PRESET = "narasya_publishing"
+
+        // link
+        let linkBuku = "";
+
+        window.buatLink = function() {
+            let teks = document.getElementById("teks").value;
+            let url = document.getElementById("url").value;
+
+            linkBuku = url;
+
+            document.getElementById("link").innerHTML = `<a href="${url}" target="_blank">${teks}</a>`
         }
+
+        // data
+        async function uploadImageToCloudinary(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", UPLOAD_PRESET);
+
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: "POST",
+                body: formData
+            });
+            const data = await res.json();
+            return data.secure_url;
+        }
+
+        window.simpanData = async function() {
+            const btn = document.querySelector("button[onclick='simpanData()']");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Mengunggah...";
+            }
+
+            try {
+                const fileInput = document.getElementById("cover").files[0];
+                let imageUrl = "";
+                if (fileInput) {
+                    imageUrl = await uploadImageToCloudinary(fileInput);
+                }
+
+                await addDoc(collection(db, "books"), {
+                    judul: document.getElementById('judul').value,
+                    cover: imageUrl,
+                    penulis: document.getElementById('penulis').value,
+                    tahunTerbit: document.getElementById('tahunTerbit').value,
+                    isbn: document.getElementById('isbn').value,
+                    sinopsis: document.getElementById('sinopsis').value,
+                    teks: document.getElementById('teks').value,
+                    link: linkBuku,
+                    createdAt: new Date()
+                });
+
+                alert("Berhasil mengunggah");
+                window.location.href = "Katalog.html";
+            } catch (error) {
+                console.error("Gagal menyimpan: " + error);
+                alert("Gagal mengunggah: " + error.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "Publikasikan";
+                }
+            }
+        };
     </script>
 </body>
 </html>
