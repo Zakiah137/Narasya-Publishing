@@ -196,61 +196,108 @@ viewBox="500 8500 13000 9500"
 
     <div id="upload" style="text-align: left; margin-bottom: 30px; margin-left: 20px;"></div>
 
-    <script>
-        let buku = JSON.parse(localStorage.getItem('book')) || []
+    <script type="module">
+        import { initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOrBwYYx-VOC44IHZW0Wn_ifSTwdvBub0",
+            authDomain: "narasya-publishing.firebaseapp.com",
+            projectId: "narasya-publishing",
+            storageBucket: "narasya-publishing.firebasestorage.app",
+            messagingSenderId: "532075136025",
+            appId: "1:532075136025:web:3e722988a411c13814d688",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
-                if (isAdmin) {
+        if (isAdmin) {
             document.getElementById('upload').innerHTML = `
-            <a href="Up Book.html" style="background: #131313; color: #dddddd; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-family: arial; display: inline-book;">Upload</a>
+            <a href="Up Book.html" style="background: #131313; color: #dddddd; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-family: arial; display: inline-block;">Upload</a>
             `;
         }
 
-        const eventContainer = document.getElementById('terbit');
-        eventContainer.innerHTML = '';
-        buku.forEach(function(terbit, index) {
-            eventContainer.innerHTML += `
-            <div class="card-event" onclick="detail(${index})" style="cursor: pointer;">
-                <div class="img-container">
-                    <img src="${terbit.cover}">
-                </div>
-                <h3>${terbit.judul}</h3>
-                <a href="${terbit.link}" target="_blank" style="background: #bddeff ; color: #131313; font-family: arial; font-weight: bold; padding: 6px 12px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 5px">${terbit.teks}</a>
+        async function loadBuku() {
+            const eventContainer = document.getElementById('terbit');
 
-                ${isAdmin ? `
-                <div style="margin-top: 10px;" onclick="event.stopPropagation()">
-                <button onclick="edit(${index})">edit</button>
-                <button onclick="hapus(${index})">hapus</button>
-                </div>
-                ` : ''}
-            </div> `
-        });
+            try {
+                const q = query(collection(db, "books"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
 
-        function detail(index) {
-            window.location.href = `Detail.html?id=${index}`;
+                eventContainer.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    eventContainer.innerHTML = '<p>Belum ada buku di katalog.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnapshot) => {
+                    const terbit = docSnapshot.data();
+                    const docId = docSnapshot.id;
+                    const teksTombol = terbit.teks ? terbit.teks : 'Beli';
+
+                    eventContainer.innerHTML += `
+                    <div class="card-event" onclick="detail('${docId}')" style="cursor: pointer;">
+                        <div class="img-container">
+                            <img src="${terbit.cover}">
+                        </div>
+                        <h3>${terbit.judul}</h3>
+                        <a href="${terbit.link}" target="_blank" style="background: #bddeff ; color: #131313; font-family: arial; font-weight: bold; padding: 6px 12px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 5px">${teksTombol}</a>
+
+                        ${isAdmin ? `
+                        <div style="margin-top: 10px;" onclick="event.stopPropagation()">
+                        <button onclick="edit('${docId}', '${terbit.cover}', '${terbit.judul}', '${teksTombol}', '${terbit.link}')">edit</button>
+                        <button onclick="hapus('${docId}')">hapus</button>
+                        </div>
+                        ` : ''}
+                    </div> 
+                    `;
+                });
+            } catch (error) {
+                console.error("Gagal memuat: " + error);
+                eventContainer.innerHTML = '<p>Gagal memuat data.</p>';
+            }
         }
 
-
-        function edit(index) {
-            let cover = prompt("Edit cover", buku[index].cover);
-            let judul = prompt("Edit judul:", buku[index].judul);
-            let teks = prompt("Edit teks", buku[index].teks);
-            let link = prompt("Edit link", buku[index].link);
+        window.detail = function(id) {
+            window.location.href = `detail.html?id=${id}`;
+        };
+        
+        window.edit = async function(id, curCover, curJudul, curTeks, curLink) {
+            let cover = prompt("Edit cover", curCover);
+            let judul = prompt("Edit judul:", curJudul);
+            let teks = prompt("Edit teks:", curTeks);
+            let link = prompt("Edit link:", curLink);
 
             if (cover !== null && judul !== null && teks !== null && link !== null) {
-                buku[index] = {judul: judul, cover: cover, teks: teks, link: link};
-                localStorage.setItem('book', JSON.stringify(buku));
-                window.location.reload();
+                try {
+                    const docRef = doc(db, "books", id);
+                    await updateDoc(docRef, { cover, judul, teks, link });
+                    alert("Buku berhasil diperbarui");
+                    window.location.reload();
+                } catch (error) {
+                    console.error("Gagal edit: ", error);
+                    alert("Gagal memperbarui.");
+                }
             }
-        }
+        };
 
-        function hapus(index) {
-            if (confirm("Hapus")) {
-                buku.splice(index, 1);
-                localStorage.setItem('book', JSON.stringify(buku));
-                window.location.reload();
+        window.hapus = async function(id) {
+            if (confirm("Anda yakin menghapus data ini secara permanen?")) {
+                try {
+                    await deleteDoc(doc(db, "books", id));
+                    alert("Buku berhasil dihapus.");
+                    window.location.reload();
+                } catch (error) {
+                    console.error("Gagal menghapus: " + error);
+                    alert("Gagal menghapus data.");
+                }
             }
-        }
+        };
+
+        loadBuku();
     </script>
 </body>
 </html>
