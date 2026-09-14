@@ -210,6 +210,10 @@ viewBox="500 8500 13000 9500"
                 body: formData
             });
             const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error ? data.error.message : "Gagal upload ke Katalog");
+            }
+            
             return data.secure_url;
         }
 
@@ -228,14 +232,14 @@ viewBox="500 8500 13000 9500"
                 }
 
                 await addDoc(collection(db, "books"), {
-                    judul: document.getElementById('judul').value,
-                    cover: imageUrl,
-                    penulis: document.getElementById('penulis').value,
-                    tahunTerbit: document.getElementById('tahunTerbit').value,
-                    isbn: document.getElementById('isbn').value,
-                    sinopsis: document.getElementById('sinopsis').value,
-                    teks: document.getElementById('teks').value,
-                    link: linkBuku,
+                    judul: document.getElementById('judul').value || "",
+                    cover: imageUrl || "",
+                    penulis: document.getElementById('penulis').value || "",
+                    tahunTerbit: document.getElementById('tahunTerbit').value || "",
+                    isbn: document.getElementById('isbn').value || "",
+                    sinopsis: document.getElementById('sinopsis').value || "",
+                    teks: document.getElementById('teks').value || "",
+                    link: linkBuku || "",
                     createdAt: new Date()
                 });
 
