@@ -10,7 +10,6 @@
         }
 
         header {
-            background-color: #131313;
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
@@ -64,6 +63,7 @@
         }
 
         body {
+            display: none;
             padding-top: 80px;
             margin: 0;
             margin-bottom: 0;
@@ -172,6 +172,7 @@ viewBox="500 8500 13000 9500"
     <script type="module">
         import { initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getFirestore, collection, addDoc} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBOrBwYYx-VOC44IHZW0Wn_ifSTwdvBub0",
@@ -186,6 +187,15 @@ viewBox="500 8500 13000 9500"
         const db = getFirestore(app);
         const CLOUD_NAME = "mksvjjiv";
         const UPLOAD_PRESET = "narasya_publishing"
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert("Gagal login.");
+                window.location.href = "index.html";
+            } else {
+                document.body.style.display = "block";
+            }
+        });
 
         // link
         let linkBuku = "";
@@ -213,7 +223,7 @@ viewBox="500 8500 13000 9500"
             if (!res.ok) {
                 throw new Error(data.error ? data.error.message : "Gagal upload ke Katalog");
             }
-            
+
             return data.secure_url;
         }
 
