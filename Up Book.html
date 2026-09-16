@@ -172,7 +172,7 @@ viewBox="500 8500 13000 9500"
     <script type="module">
         import { initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getFirestore, collection, addDoc} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBOrBwYYx-VOC44IHZW0Wn_ifSTwdvBub0",
@@ -185,6 +185,7 @@ viewBox="500 8500 13000 9500"
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app)
         const CLOUD_NAME = "mksvjjiv";
         const UPLOAD_PRESET = "narasya_publishing"
 
