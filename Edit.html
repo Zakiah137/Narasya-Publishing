@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<body>
+    <form id="edit">
+        <label>Judul</label>
+        <input type="text" id="judul"><br><br>
+
+        <label>Penulis</label>
+        <input type="text" id="penulis"><br><br>
+
+        <label>Tahun terbit</label>
+        <input type="text" id="tahunTerbit"><br><br>
+
+        <label>ISBN</label>
+        <input type="text" id="isbn"><br><br>
+        
+        <label>Sinopsis</label>
+        <textarea id="sinopsis" rows="5" cols="40"></textarea>
+
+        <button type="button" id="btnSimpan">Simpan</button>
+        <a id="btnBatal" href="#">Batal</a>
+    </form>
+
+    <script type="module">
+        import { initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getFirestore, collection, getDoc, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebase/12.18.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOrBwYYx-VOC44IHZW0Wn_ifSTwdvBub0",
+            authDomain: "narasya-publishing.firebaseapp.com",
+            projectId: "narasya-publishing",
+            storageBucket: "narasya-publishing.firebasestorage.app",
+            messagingSenderId: "532075136025",
+            appId: "1:532075136025:web:3e722988a411c13814d688",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert("Siapa lu");
+                window.location.href = "Katalog.html";
+            }
+        });
+        
+        if (bookId) {
+            document.getElementById('btnBatal').href = `Detail.html?id=${bookId}`;
+        }
+
+        async function loadDataBuku() {
+            if (!bookId) {
+                alert("Buku tidak ditemukan.");
+                window.location.href = "Katalog.html";
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "books", bookId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('judul').value = data.judul || '';
+                    document.getElementById('penulis').value = data.penulis || '';
+                    document.getElementById('tahunTerbit').value = data.tahunTerbit || '';
+                    document.getElementById('isbn').value = data.isbn || '';
+                    document.getElementById('sinopsis').value = data.sinopsis || '';
+                } else {
+                    alert("Data tidak ditemukan.");
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data", error);
+            }
+        }
+
+        async function simpan() {
+            try {
+                const docRef = doc(db, "books", bookId);
+
+                await updateDoc(docRef, {
+                    judul: document.getElementById('judul').value,
+                    penulis: document.getElementById('penulis').value,
+                    tahunTerbit: document.getElementById('tahunTerbit').value,
+                    isbn: document.getElementById('isbn').value,
+                    sinopsis: document.getElementById('sinopsis').value,
+                });
+
+                alert("Berhasil memperbarui.");
+                window.location.href = `Detail.html?id=${bookId}`;
+            } catch (error) {
+                console.error("Gagal memperbarui: ", error);
+                alert("Gagal memperbarui.");
+            }
+        }
+
+        document.getElementById('btnSimpan').addEventListener('click', simpan);
+        loadDataBuku();
+    </script>
+</body>
