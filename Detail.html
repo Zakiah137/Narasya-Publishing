@@ -189,6 +189,7 @@ viewBox="500 8500 13000 9500"
     <script type="module">
         import { initializeApp} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getFirestore, collection, getDoc, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBOrBwYYx-VOC44IHZW0Wn_ifSTwdvBub0",
@@ -204,6 +205,7 @@ viewBox="500 8500 13000 9500"
         const urlParams = new URLSearchParams(window.location.search);
         const bookId = urlParams.get('id');
         const container = document.getElementById('detail');
+        const auth = getAuth(app);
 
         async function loadDetailBuku() {
             if (!bookId) {
@@ -223,13 +225,14 @@ viewBox="500 8500 13000 9500"
                     <img src="${detailBuku.cover}" style="width: 220px; height: 320px; object-fit: cover; border-radius: 8px;"><br><br>
 
                     <div class="detail-info"> 
-                    <h1>${detailBuku.judul}</h1>
-                    <p><strong>Penulis: </strong> ${detailBuku.penulis || '-'}</p>
-                    <p><strong>Tahun Terbit: </strong> ${detailBuku.tahunTerbit || '-'}</p>
-                    <p><strong>ISBN: </strong> ${detailBuku.isbn || '-'}</p>
-                    <h3 style="margin: 10px 0 4px 0;">Sinopisis: </h3>
-                    <p style="max-height: 200px; overflow-y: auto; padding-right: 5px; line-height: 1.5; max-width: 600px;">${detailBuku.sinopsis || 'Belum ada sinopsis.'}</p>
-                    <a href="${detailBuku.link}" target="_blank" style="width: fit-content; background: #bddeff; color: #131313; font-family: Arial, sans-serif; font-weight: bold; font-size: 14px; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 15px; transition: background-color 0.2s ease, transform 0.1s ease;">${teksTombol}</a>
+                        <h1>${detailBuku.judul}</h1>
+                        <p><strong>Penulis: </strong> ${detailBuku.penulis || '-'}</p>
+                        <p><strong>Tahun Terbit: </strong> ${detailBuku.tahunTerbit || '-'}</p>
+                        <p><strong>ISBN: </strong> ${detailBuku.isbn || '-'}</p>
+                        <h3 style="margin: 10px 0 4px 0;">Sinopisis: </h3>
+                        <p style="max-height: 200px; overflow-y: auto; padding-right: 5px; line-height: 1.5; max-width: 600px;">${detailBuku.sinopsis || 'Belum ada sinopsis.'}</p>
+                        <a href="${detailBuku.link}" target="_blank" style="width: fit-content; background: #bddeff; color: #131313; font-family: Arial, sans-serif; font-weight: bold; font-size: 14px; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top: 15px; transition: background-color 0.2s ease, transform 0.1s ease;">${teksTombol}</a>
+                        <a href="Edit.html?id=${bookId}" style="display: none; width: fit-content; background: #ffca28; color: #131313; font-family: Arial, sans-serif; font-weight: bold; font-size: 14px; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; margin-top 10px;">Edit</a>
                     </div>
                     `;
                 } else {
@@ -242,6 +245,13 @@ viewBox="500 8500 13000 9500"
         }
 
         loadDetailBuku();
+
+        onAuthStateChanged(auth, (user) => {
+            const btnEdit = document.getElementById('btnEditBuku');
+            if (user && btnEdit) {
+                btnEdit.style.display = "inline-block";
+            }
+        });
     </script>
 </body>
 </html>
